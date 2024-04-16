@@ -1,0 +1,24 @@
+cff-version: 1.2.0
+title: ACEMA O-RAN
+message: >-
+  If you use this software, please cite it using the
+  metadata from this file.
+type: software
+authors:
+  - given-names: Felix
+    family-names: Klement
+    email: felix.klement@uni-passau.de
+    affiliation: University of Passau
+    orcid: 'https://orcid.org/0000-0001-9650-7698'
+identifiers:
+  - type: doi
+    value: 10.1109/JSAC.2023.3339172
+repository-code: 'https://github.com/fklement/acema_oran'
+keywords:
+  - Security
+  - open RAN
+  - telecommunication
+  - MITRE ATT&CK
+  - CVE
+  - CWE
+license: MIT
