@@ -49,11 +49,11 @@ def generate_ax(file):
     )
 
 
-def get_grouped_o_cloud_data(file, drop_duplicates: bool = False):
+def get_grouped_o_cloud_data(file, drop_duplicates: bool = False, group_by: str = "Name"):
     o_cloud = pd.read_csv(file, sep=';', index_col=0)
     if drop_duplicates:
         o_cloud = o_cloud.drop_duplicates(subset=["Technique"])
-    return o_cloud.groupby("Name")
+    return o_cloud.groupby(group_by)
 
 
 def gen_counted_accourences_per_platform(grouped, techniques_df):
@@ -94,7 +94,6 @@ def plot_and_save_bar(counts, file, show_title: bool = False, show_x_axis_descri
 
     plt.xticks(rotation=rotate_bar_description)
     save_plot(file)
-    plt.show()
 
 
 def get_threats_tactics(grouped, techniques_df):
@@ -132,7 +131,6 @@ def plot_and_save_heat(ax, file=None):
 
     plt.grid(visible=False)
     save_plot(file)
-    plt.show()
 
 
 def get_json_data(file):
@@ -185,8 +183,10 @@ def print_stats(fetched_info):
 
     count_cwe = 0
     count_cve = 0
+    count_teq = 0
 
     for technique in fetched_info:
+        count_teq += 1
         for cwes in technique["t_findings"]:
             count_cwe += 1
             for cves in cwes["c_findings"]:
@@ -197,6 +197,7 @@ def print_stats(fetched_info):
                     avg_v2_impact_score.append(df["v2_impact_score"].mean())
                     avg_v2_exploitability_score.append(df["v2_exploitability_score"].mean())
 
+    print(f"Count_teq: {count_teq}")
     print(f"Count_cwe: {count_cwe}")
     print(f"Count_cve: {count_cve}")
     avg_v2_score = statistics.mean(avg_v2_score)
@@ -227,7 +228,63 @@ def gen_statistics_per_tactic(fetched_info):
     )
     # Cast data to category type with orderedness
     overall_df["Severity"] = overall_df["Severity"].astype(severity_order)
-    return overall_df.groupby(["Technique", "Severity"])["Score"].sum().reset_index()
+    return overall_df.groupby(["Technique", "Severity"])["Score"].sum().reset_index(), overall_df.groupby(["Technique", "Severity"])["Score"].mean().reset_index()
+
+# from the fetched info, delete all data but this and write to a new json file:
+#  technique_id 
+#  t_findings 
+#    capec_id 
+#    c_findings 
+#      cwe 
+#      cves 
+#        id 
+#        v2_score 
+#        v2_impact_score 
+#        v2_exploitability_score 
+def generate_json_with_scores(fetched_info):
+    new_json = []
+    for technique in fetched_info:
+        new_technique = {
+            "technique_id": technique["technique_id"],
+            "t_findings": [],
+            "avg_score": 0
+        }
+        for cwes in technique["t_findings"]:
+            new_cwes = {
+                "capec_id": cwes["capec_id"],
+                "c_findings": []
+            }
+            for cves in cwes["c_findings"]:
+                new_cves = {
+                    "cwe": cves["cwe"],
+                    "cves": []
+                }
+                for cve in cves["cves"]:
+                    new_cve = {
+                        "id": cve["id"],
+                        "v2_score": cve["v2_score"],
+                        "v2_impact_score": cve["v2_impact_score"],
+                        "v2_exploitability_score": cve["v2_exploitability_score"]
+                    }
+                    new_cves["cves"].append(new_cve)
+                new_cwes["c_findings"].append(new_cves)
+            new_technique["t_findings"].append(new_cwes)
+        # for each technique, calculate the average score of all its cves and add it to new_technique
+        all_v2_scores = [cve["v2_score"] for cwes in new_technique["t_findings"] for cves in cwes["c_findings"] for cve in cves["cves"]]
+        all_v2_impact_scores = [cve["v2_impact_score"] for cwes in new_technique["t_findings"] for cves in cwes["c_findings"] for cve in cves["cves"]]
+        all_v2_exploitability_score = [cve["v2_exploitability_score"] for cwes in new_technique["t_findings"] for cves in cwes["c_findings"] for cve in cves["cves"]]
+        if len(all_v2_scores) > 0:
+            new_technique["avg_score"] = statistics.mean(all_v2_scores)
+            new_technique["avg_impact_score"] = statistics.mean(all_v2_impact_scores)
+            new_technique["avg_exploitability_score"] = statistics.mean(all_v2_exploitability_score)
+        else:
+            new_technique["avg_score"] = 0
+            new_technique["avg_impact_score"] = 0
+            new_technique["avg_exploitability_score"] = 0
+        new_json.append(new_technique)
+    with open('./scans/t-cwe-cve-dict-small.json', 'w') as f:
+        json.dump({"data": new_json}, f)
+
 
 
 def insert_lenth_wise(df, cols=('AV', 'AC', 'Au', 'C', 'I', 'A'), orogin_col='Vector'):
@@ -322,11 +379,7 @@ def plot_and_save_radar(df, file=None, groups=None, filled: bool = True, dotted:
     # Add legend
     plt.legend(loc='upper right', bbox_to_anchor=(0.1, 0.1))
 
-    # Guess what that does
     save_plot(file)
-
-    # Show the graph
-    plt.show()
 
 
 def plot_and_save_bar_broken_axis(o_ran_threats_severity, file):
@@ -363,7 +416,6 @@ def plot_and_save_bar_broken_axis(o_ran_threats_severity, file):
     plt.rc('legend', fontsize=MEDIUM_SIZE)  # legend fontsize
     plt.rc('figure', titlesize=BIGGER_SIZE)  # fontsize of the figure title
     save_plot(file)
-    plt.show()
 
 
 def gen_o_ran_threats_severity(grouped, sum_overall_technique_df):
