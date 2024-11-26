@@ -1,6 +1,11 @@
-# ACEMA O-RAN <img src="img/logo_transparent.png" height="180" align="right">
+# Notice: Custom Version for Bachelor Thesis
 
-![Jupyter](https://img.shields.io/badge/Jupyter-F37626?logo=jupyter&logoColor=fff&style=for-the-badge)
+This is a customized version of the repository specifically tailored for the implementation of a dashboard as part of my Bachelor thesis titled:
+
+"Implementation of a Dashboard for Pentesting in a Digital Forensics and Incident Response (DFIR) Environment for Open RAN."
+
+For the original files and data, please refer to the original repository at: [https://github.com/fklement/acema_oran](https://github.com/fklement/acema_oran).
+
 
 This repository encompasses the set of code and data requisite for the replication of outcomes delineated in our paper "Towards Securing the 6G Transition: A Comprehensive Empirical Method to Analyze Threats in O-RAN Environments". The "Quickstart" section expounds upon the framework and essential prerequisites essential for executing the jupyter notebooks. ACEMA stands for _A Comprehensive Empirical Method to Analyze_.
 
@@ -59,5 +64,3 @@ If you use the provided code, please cite it as:
 ## Release notes
 
 See the [changelog](CHANGELOG.md) for changes between versions.
-
-![Project logos](img/footer-logos.png)
