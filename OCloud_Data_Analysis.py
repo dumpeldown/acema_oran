@@ -230,17 +230,6 @@ def gen_statistics_per_tactic(fetched_info):
     overall_df["Severity"] = overall_df["Severity"].astype(severity_order)
     return overall_df.groupby(["Technique", "Severity"])["Score"].sum().reset_index(), overall_df.groupby(["Technique", "Severity"])["Score"].mean().reset_index()
 
-# from the fetched info, delete all data but this and write to a new json file:
-#  technique_id 
-#  t_findings 
-#    capec_id 
-#    c_findings 
-#      cwe 
-#      cves 
-#        id 
-#        v2_score 
-#        v2_impact_score 
-#        v2_exploitability_score 
 def generate_json_with_scores(fetched_info):
     new_json = []
     for technique in fetched_info:
@@ -285,9 +274,7 @@ def generate_json_with_scores(fetched_info):
     with open('./scans/t-cwe-cve-dict-small.json', 'w') as f:
         json.dump({"data": new_json}, f)
 
-
-
-def insert_lenth_wise(df, cols=('AV', 'AC', 'Au', 'C', 'I', 'A'), orogin_col='Vector'):
+def insert_length_wise(df, cols=('AV', 'AC', 'Au', 'C', 'I', 'A'), orogin_col='Vector'):
     # create list
     pd_list = df[orogin_col].to_list()
 
@@ -444,7 +431,3 @@ def gen_vector_df(fetched_info, lo_net):
                     else:
                         continue
     return vector_df
-
-
-def test_if_used():
-    print("nothing")

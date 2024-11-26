@@ -25,9 +25,9 @@ mapping = {"AC": "Access Complexity", "Au": "Authentication",
                    "I": "Integrity Impact", "A": "Availability Impact"}
 vector_df_network = gen_vector_df(fetched_info, "NETWORK")
 vector_df_local = gen_vector_df(fetched_info, "LOCAL")
-vector_df_network = insert_lenth_wise(vector_df_network)
+vector_df_network = insert_length_wise(vector_df_network)
 vector_network_avgs = vector_df_network.mean(axis=0)
-vector_df_local = insert_lenth_wise(vector_df_local)
+vector_df_local = insert_length_wise(vector_df_local)
 vector_local_avgs = vector_df_local.mean(axis=0)
     
 vectors = [get_scores_from_vector(cve["v2_vector"]) for technique in fetched_info for cwes in technique["t_findings"] for cves in cwes["c_findings"] for cve in cves["cves"]]

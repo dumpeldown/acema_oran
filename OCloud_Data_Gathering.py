@@ -6,7 +6,6 @@ import time
 from datetime import date
 from collections import defaultdict
 
-import cve_lookup
 import mitreattack.attackToExcel.attackToExcel as attackToExcel
 import mitreattack.attackToExcel.stixToDf as stixToDf
 import nvdlib
@@ -43,13 +42,12 @@ def get_attack_pattern_by_capec_id(src, capec_id):
 
 def get_capec_external_references_cwes(src, capec):
     id = capec.split("-")[1]
-    test = get_attack_pattern_by_capec_id(src, id)
-    if len(test) != 0:
-        return test[0]["external_references"]
+    all_refs = get_attack_pattern_by_capec_id(src, id)
+    if len(all_refs) != 0:
+        return all_refs[0]["external_references"]
     else:
         return []
 
-# Uncomment lines in this function to more CWE and CVE information
 def iterate_cve_for_given_cwe(db, cwe):
     cve_list = []
     weakness = db.get(cwe.split("-")[1])
@@ -62,30 +60,26 @@ def iterate_cve_for_given_cwe(db, cwe):
         cve_num += 1
         print(cve, end=', ')
         cve_list.append(cve)
-        #cve_list.append(get_cve_info(cve))
+        #cve_list.append(get_cve_info(cve)) # Uncomment this line to get full CVE info
     return {"cwe": cwe, 
             "cves": cve_list,
-            "cwe_info": weakness.__dict__
+            #"cwe_info": weakness.__dict__  # Uncomment this line to get full CWE info
             }
 
 
 def pull_clone_gitrepo(directory, repo):
-    # Check if the data direcory exists
     if not os.path.isdir(directory):
         Repo.clone_from(repo, directory)
     else:
         try:
-            # Check if the data directory is actually a repositry then pull the canges
             repo = Repo(directory)
             repo.remotes.origin.pull()
         except InvalidGitRepositoryError:
-            # If not then remove the folder
             shutil.rmtree(directory)
             Repo.clone_from(repo, directory)
 
 
 def generate_techniques_dataframe():
-    # download and parse ATT&CK STIX data
     attackdata = attackToExcel.get_stix_data("enterprise-attack", "v4.0")
     # get Pandas DataFrames for techniques, associated relationships, and citations
     techniques_data = stixToDf.techniquesToDf(attackdata, "enterprise-attack")
@@ -113,8 +107,6 @@ def get_technique_capecs_id(grouped, techniques_df):
                         capecs.append(c)
             techniques_capecs.append((i, capecs))
     return techniques_capecs
-
-from stix2 import Filter
 
 def get_technique_capecs_id_custom(techniques, directory):
     grouped_results = defaultdict(list)
@@ -191,19 +183,22 @@ def print_cwe_stats(t_cwe_cve_dict):
     count_cwes = 0
     count_cves = 0
     unique_cwes = set()
+    unique_cves = set()
     for t in t_cwe_cve_dict["data"]:
         for c in t["t_findings"]:
             for f in c["c_findings"]:
                 count_cwes += 1
                 count_cves += len(f["cves"])
                 unique_cwes.add(f["cwe"])
+                unique_cves.add(f["cves"])
     print(f"CWE's: {count_cwes}")
     print(f"Unique CWE's: {len(unique_cwes)}")
-def find_cwe_for_capec(techniques_capecs, fs):
-
+    print(f"CVE's: {count_cves}")
+    print(f"Unique CVE's: {len(unique_cves)}")
+    
+def find_cwe_for_capec(start, techniques_capecs, fs):
     capec_list = []
     list_of_tinfos = []
-    start = time.time()
     print("Start fetching CAPEC'S -> CWE'S -> CVE'S for given CAPEC-IDS...")
     for t_id, capec_ids in techniques_capecs:
         if len(capec_ids) != 0:
@@ -214,9 +209,8 @@ def find_cwe_for_capec(techniques_capecs, fs):
                 for reference in get_capec_external_references_cwes(fs, c_id):
                     if reference["source_name"] == "cwe":
                         print("Found: ", reference["external_id"])
-                        #findings.append(reference["external_id"])
+                        #findings.append(reference["external_id"]) # Uncomment this line to only get CWE's, no CVE's
                         findings.append(iterate_cve_for_given_cwe(db, reference["external_id"]))
-                print(f"Found {len(findings)} CWE's for {c_id}")
                 capec_list.append({"capec_id": c_id, "c_findings": findings})
                 print("\n")
         list_of_tinfos.append({"technique_id": t_id, "t_findings": capec_list})
@@ -273,6 +267,5 @@ def get_cve_info(cve):
 
 def get_technique_list(file):
     with open(file, 'r') as f:
-        reader = csv.DictReader(f, delimiter=';')           # skip headers
-        # get data from column "Technique"
+        reader = csv.DictReader(f, delimiter=';')
         return list(set([row['Technique'] for row in reader]))
