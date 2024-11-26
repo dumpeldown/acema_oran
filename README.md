@@ -6,6 +6,7 @@ This is a customized version of the repository specifically tailored for the imp
 
 For the original files and data, please refer to the original repository at: [https://github.com/fklement/acema_oran](https://github.com/fklement/acema_oran).
 
+-------
 
 This repository encompasses the set of code and data requisite for the replication of outcomes delineated in our paper "Towards Securing the 6G Transition: A Comprehensive Empirical Method to Analyze Threats in O-RAN Environments". The "Quickstart" section expounds upon the framework and essential prerequisites essential for executing the jupyter notebooks. ACEMA stands for _A Comprehensive Empirical Method to Analyze_.
 
