@@ -12,7 +12,7 @@ grouped_by_tactic.describe()
 ax = generate_ax('./mapping/automatic_o_cloud_count_tactics_per_threat.csv')
 plot_and_save_heat(ax, './img/tactics_heatmap.pdf')
 
-fetched_info = get_json_data('./scans/t-cwe-cve-dict_custom.json')
+fetched_info = get_json_data('./scans/t-cwe-cve-dict.json')
 # Write smaller file for use in the dashboard
 #generate_json_with_scores(fetched_info)
 

@@ -26,7 +26,7 @@ techniques_capecs_custom = [(t[0], list(set(t[1] + techniques_capecs[technique_l
 write_ids_to_file(techniques_capecs_custom, file ='./mapping/o_cloud_capecs_per_technique.csv')
 # time tracking ends when all CVE Data is gathered inside this function
 t_cwe_cve_dict_custom = find_cwe_for_capec(start, techniques_capecs_custom,fs)
-write_dict_to_file(t_cwe_cve_dict_custom, "./scans/t-cwe-cve-dict_custom.json")
+write_dict_to_file(t_cwe_cve_dict_custom, "./scans/t-cwe-cve-dict.json")
 
 #print("Data Gathering using ACEMA impl")
 #print_capec_stats(techniques_capecs)
