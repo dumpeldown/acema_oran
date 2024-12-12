@@ -59,8 +59,8 @@ def iterate_cve_for_given_cwe(db, cwe):
         print(f"({cve_num+1}/{len(cves)}) ", end='')
         cve_num += 1
         print(cve, end=', ')
-        cve_list.append(cve)
-        #cve_list.append(get_cve_info(cve)) # Uncomment this line to get full CVE info
+        #cve_list.append(cve)
+        cve_list.append(get_cve_info(cve)) # Uncomment this line to get full CVE info
     return {"cwe": cwe, 
             "cves": cve_list,
             #"cwe_info": weakness.__dict__  # Uncomment this line to get full CWE info
@@ -182,19 +182,13 @@ def print_capec_stats(techniques_capecs):
 def print_cwe_stats(t_cwe_cve_dict):
     count_cwes = 0
     count_cves = 0
-    unique_cwes = set()
-    unique_cves = set()
     for t in t_cwe_cve_dict["data"]:
         for c in t["t_findings"]:
             for f in c["c_findings"]:
                 count_cwes += 1
                 count_cves += len(f["cves"])
-                unique_cwes.add(f["cwe"])
-                unique_cves.add(f["cves"])
     print(f"CWE's: {count_cwes}")
-    print(f"Unique CWE's: {len(unique_cwes)}")
     print(f"CVE's: {count_cves}")
-    print(f"Unique CVE's: {len(unique_cves)}")
     
 def find_cwe_for_capec(start, techniques_capecs, fs):
     capec_list = []

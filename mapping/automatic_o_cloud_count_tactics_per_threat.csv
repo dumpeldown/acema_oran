@@ -3,26 +3,26 @@ T-ADMIN-01,8,Impact
 T-ADMIN-02,13,Execution
 T-ADMIN-02,9,Credential Access
 T-GEN-01,1,Initial Access
+T-GEN-02,10,Credential Access
 T-GEN-02,6,Initial Access
 T-GEN-02,6,Persistence
 T-GEN-02,5,Defense Evasion
 T-GEN-02,5,Privilege Escalation
-T-GEN-02,10,Credential Access
 T-HW-01,12,Execution
 T-IMG-01,2,Initial Access
-T-IMG-01,1,Persistence
 T-IMG-01,13,Execution
-T-IMG-01,14,Defense Evasion
+T-IMG-01,1,Persistence
 T-IMG-01,1,Collection
+T-IMG-01,14,Defense Evasion
 T-IMG-03,9,Credential Access
+T-IMG-04,1,Collection
 T-IMG-04,2,Defense Evasion
 T-IMG-04,1,Execution
-T-IMG-04,1,Collection
+T-O2-01,2,Discovery
 T-O2-01,1,Execution
 T-O2-01,11,Defense Evasion
-T-O2-01,2,Discovery
-T-VL-01,12,Defense Evasion
 T-VL-01,5,Impact
+T-VL-01,12,Defense Evasion
 T-VL-02,12,Persistence
 T-VL-02,6,Privilege Escalation
 T-VL-02,6,Defense Evasion
@@ -31,8 +31,8 @@ T-VM-C-01,13,Persistence
 T-VM-C-01,7,Privilege Escalation
 T-VM-C-01,18,Defense Evasion
 T-VM-C-01,2,Impact
-T-VM-C-02,1,Privilege Escalation
 T-VM-C-02,1,Lateral Movement
+T-VM-C-02,1,Privilege Escalation
 T-VM-C-03,1,Execution
 T-VM-C-03,9,Credential Access
 T-VM-C-04,1,Execution

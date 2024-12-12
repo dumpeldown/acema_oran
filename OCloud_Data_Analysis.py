@@ -43,8 +43,8 @@ def generate_ax(file):
 
     return sns.heatmap(
         fp,
-        vmin=1, vmax=7, center=3.5,
-        cmap=sns.color_palette("Spectral_r", 8, as_cmap=True),
+        vmin=1, vmax=15, center=7.5,
+        cmap=sns.color_palette("Spectral_r", 5, as_cmap=True),
         square=False
     )
 
@@ -145,6 +145,8 @@ def generate_per_technique_df(fetched_info):
             inter_df = pd.DataFrame(columns=["avg_base", "avg_impact", "avg_exploitability"])
 
             for cves in cwes["c_findings"]:
+                if type(cves) is str:
+                    continue
                 if len(cves["cves"]) > 0:
                     df = pd.DataFrame.from_dict(cves["cves"])
                     avg_v2_score = statistics.mean(df['v2_score'].to_list())
@@ -166,7 +168,6 @@ def generate_per_technique_df(fetched_info):
 
 def print_data_per_tecnique(grouped, overall_df):
     for name, group in grouped:
-        print(name)
         avgs_per_technique = pd.DataFrame()
 
         for technique_id in group["Technique"]:
@@ -177,30 +178,36 @@ def print_data_per_tecnique(grouped, overall_df):
 
 
 def print_stats(fetched_info):
-    avg_v2_score = []
+    avg_v2_score = {}
     avg_v2_impact_score = []
     avg_v2_exploitability_score = []
 
+    count_capec = 0
     count_cwe = 0
     count_cve = 0
     count_teq = 0
 
     for technique in fetched_info:
+        teq_name = technique["technique_id"]
+        print(f"Technique: {teq_name}")
         count_teq += 1
-        for cwes in technique["t_findings"]:
-            count_cwe += 1
-            for cves in cwes["c_findings"]:
-                df = pd.DataFrame.from_dict(cves["cves"])
-                if df.keys().size != 0:
-                    count_cve += df["v2_score"].keys().size
-                    avg_v2_score.append(df["v2_score"].mean())
-                    avg_v2_impact_score.append(df["v2_impact_score"].mean())
-                    avg_v2_exploitability_score.append(df["v2_exploitability_score"].mean())
+        for capec in technique["t_findings"]:
+            count_capec += 1
+            for cves in capec["c_findings"]:
+                cves_df = pd.DataFrame.from_dict(cves["cves"])
+                count_cwe += 1
+                if cves_df.keys().size != 0:
+                    count_cve += cves_df["v2_score"].keys().size
+                    print(f"teq Name: {teq_name} -> {cves_df['v2_score'].mean()}")
+                    avg_v2_score[teq_name] = cves_df["v2_score"].mean()
+                    avg_v2_impact_score.append(cves_df["v2_impact_score"].mean())
+                    avg_v2_exploitability_score.append(cves_df["v2_exploitability_score"].mean())
 
     print(f"Count_teq: {count_teq}")
+    print(f"Count_capec: {count_capec}")
     print(f"Count_cwe: {count_cwe}")
     print(f"Count_cve: {count_cve}")
-    avg_v2_score = statistics.mean(avg_v2_score)
+    avg_v2_score = statistics.mean(avg_v2_score.values())
     print(f"avg_v2_score: {avg_v2_score}")
     avg_v2_impact_score = statistics.mean(avg_v2_impact_score)
     print(f"avg_v2_impact_score: {avg_v2_impact_score}")
@@ -214,6 +221,8 @@ def gen_statistics_per_tactic(fetched_info):
         for cwes in technique["t_findings"]:
             inter_df = pd.DataFrame(columns=["Score", "Severity"])
             for cves in cwes["c_findings"]:
+                if type(cves) is str:
+                    continue
                 if len(cves["cves"]) > 0:
                     df = pd.DataFrame.from_dict(cves["cves"])
                     new_df = pd.DataFrame(df['score'].to_list(), columns=["v", "Score", "Severity"]).drop(columns="v")
@@ -228,7 +237,7 @@ def gen_statistics_per_tactic(fetched_info):
     )
     # Cast data to category type with orderedness
     overall_df["Severity"] = overall_df["Severity"].astype(severity_order)
-    return overall_df.groupby(["Technique", "Severity"])["Score"].sum().reset_index(), overall_df.groupby(["Technique", "Severity"])["Score"].mean().reset_index()
+    return overall_df.groupby(["Technique", "Severity"])["Score"].sum().reset_index(), overall_df.groupby(["Technique", "Severity"])["Score"].mean().reset_index(), overall_df.groupby(["Technique"])["Score"].count().reset_index()
 
 def generate_json_with_scores(fetched_info):
     new_json = []
@@ -244,13 +253,15 @@ def generate_json_with_scores(fetched_info):
                 "c_findings": []
             }
             for cves in cwes["c_findings"]:
+                if type(cves) is str:
+                    continue
                 new_cves = {
                     "cwe": cves["cwe"],
                     "cves": []
                 }
                 for cve in cves["cves"]:
                     new_cve = {
-                        "id": cve["id"],
+                        "id": cve["cve_id"],
                         "v2_score": cve["v2_score"],
                         "v2_impact_score": cve["v2_impact_score"],
                         "v2_exploitability_score": cve["v2_exploitability_score"]
@@ -271,7 +282,7 @@ def generate_json_with_scores(fetched_info):
             new_technique["avg_impact_score"] = 0
             new_technique["avg_exploitability_score"] = 0
         new_json.append(new_technique)
-    with open('./scans/t-cwe-cve-dict-small.json', 'w') as f:
+    with open('./scans/t-cwe-cve-dict_small.json', 'w') as f:
         json.dump({"data": new_json}, f)
 
 def insert_length_wise(df, cols=('AV', 'AC', 'Au', 'C', 'I', 'A'), orogin_col='Vector'):
@@ -295,7 +306,7 @@ def flatten_from_df(df, loc=0):
     return values
 
 
-def set_pad_spwp(ax):
+def set_pad_spwp(ax,):
     xticks = ax.xaxis.get_major_ticks()
 
     for tick in xticks:
@@ -314,6 +325,13 @@ def add_lables_background(categories, angles, ax, size1=9):
     plt.yticks([0.25, 0.50, 0.75, 1], ["0.25", "0.50", "0.75", "1"], color="grey", size=7)
     plt.ylim(0, 1)
 
+def add_npc_lables_background(categories, angles, ax, size1=9):
+    plt.xticks(angles[:-1], categories, color='grey', size=size1)
+    # Draw ylabels
+    ax.set_rlabel_position(0)
+    plt.yticks([0,0.1,0.2, 0.3], ["0", "0.1", "0.2", "0.3"], color="grey", size=7)
+    plt.ylim(0, 1)
+
 
 def init_spider_supplot():
     plt.figure(figsize=(10, 5))
@@ -329,9 +347,10 @@ def calc_axis_angles(df):
     return angles, categories
 
 
-def plot_and_save_radar(df, file=None, groups=None, filled: bool = True, dotted: bool = False):
+def plot_and_save_radar(df, file=None, groups=None, filled: bool = True, dotted: bool = False, only_npc=False):
     # What will be the angle of each axis in the plot? (we divide the plot / number of variable)
     angles, categories = calc_axis_angles(df)
+    num_vars = len(categories)
 
     # If no groups are provided plot all groups in data Frame
     if groups is None:
@@ -345,7 +364,10 @@ def plot_and_save_radar(df, file=None, groups=None, filled: bool = True, dotted:
     ax.set_theta_direction(-1)
 
     # Draw one axe per variable + add labels
-    add_lables_background(categories, angles, ax, 7)
+    if only_npc:
+        add_npc_lables_background(categories, angles, ax, num_vars)
+    else:
+        add_lables_background(categories, angles, ax, num_vars)
 
     # ------- PART 2: Add plots
 
@@ -361,7 +383,7 @@ def plot_and_save_radar(df, file=None, groups=None, filled: bool = True, dotted:
             ax.fill(angles, values, 'b', alpha=0.1)
 
     # TODO: Looks better?
-    set_pad_spwp(ax)
+    #set_pad_spwp(ax)
 
     # Add legend
     plt.legend(loc='upper right', bbox_to_anchor=(0.1, 0.1))
@@ -406,17 +428,24 @@ def plot_and_save_bar_broken_axis(o_ran_threats_severity, file):
 
 
 def gen_o_ran_threats_severity(grouped, sum_overall_technique_df):
-    o_ran_threats_severity = pd.DataFrame()
+    o_ran_threats_severity_acc = pd.DataFrame()
+    o_ran_threats_severity_mean = pd.DataFrame()
+    
 
     for name, group in grouped:
         o_ran_threats = pd.DataFrame()
         for i in group["Technique"].drop_duplicates():
             o_ran_threats = pd.concat([o_ran_threats, sum_overall_technique_df.query("Technique == @i")])
 
-        o_ran_threat_severity = o_ran_threats.groupby("Severity").sum().reset_index()
-        o_ran_threat_severity["O-RAN Threat"] = name
-        o_ran_threats_severity = pd.concat([o_ran_threats_severity, o_ran_threat_severity], ignore_index=True)
-    return o_ran_threats_severity
+        temp_o_ran_threat_severity_acc = o_ran_threats.groupby("Severity").sum(numeric_only=True).reset_index()
+        temp_o_ran_threat_severity_mean = o_ran_threats.groupby("Severity").mean(numeric_only=True).reset_index()
+        
+        temp_o_ran_threat_severity_acc["O-RAN Threat"] = name
+        temp_o_ran_threat_severity_mean["O-RAN Threat"] = name
+        o_ran_threats_severity_acc = pd.concat([o_ran_threats_severity_acc, temp_o_ran_threat_severity_acc], ignore_index=True)
+        o_ran_threats_severity_mean = pd.concat([o_ran_threats_severity_mean, temp_o_ran_threat_severity_mean], ignore_index=True)
+        
+    return o_ran_threats_severity_acc, o_ran_threats_severity_mean
 
 
 def gen_vector_df(fetched_info, lo_net):

@@ -1,67 +1,67 @@
 Name;Domain;Description;Technique;Tactic
-T-IMG-01;enterprise-attack;Compromised image In registry;T1195.002;TA0001
-T-IMG-01;enterprise-attack;Compromised image In registry;T1525;TA0001
-T-IMG-01;enterprise-attack;Application vulnerability;T1190;TA0001
-T-GEN-02;enterprise-attack;Exposed sensitive interfaces;T1133;TA0001
-T-GEN-02;enterprise-attack;Exposed sensitive interfaces;T1133;TA0007
-T-GEN-02;enterprise-attack;Exposed sensitive interfaces;T1078;TA0001
-T-GEN-02;enterprise-attack;Exposed sensitive interfaces;T1078;TA0007
-T-ADMIN-02;enterprise-attack;Exec into container;T1609;TA0002
-T-O2-01;enterprise-attack;Exec into container;T1609;TA0002
-T-VM-C-03;enterprise-attack;Exec into container;T1609;TA0002
-T-VM-C-04;enterprise-attack;Exec into container;T1609;TA0002
-T-VM-C-01;enterprise-attack;Bash or cmd inside container;T1059;TA0002
-T-VM-C-01;enterprise-attack;Bash or cmd inside container;TT1204;TA0002
-T-ADMIN-02;enterprise-attack;Bash or cmd inside container;T1059;TA0002
-T-ADMIN-02;enterprise-attack;Bash or cmd inside container;TT1204;TA0002
-T-HW-01;enterprise-attack;Bash or cmd inside container;T1059;TA0002
-T-HW-01;enterprise-attack;Bash or cmd inside container;TT1204;TA0002
-T-IMG-01;enterprise-attack;Bash or cmd inside container;T1059;TA0002
-T-IMG-01;enterprise-attack;Bash or cmd inside container;TT1204;TA0002
-T-IMG-01;enterprise-attack;New container;T1610;TA0002
-T-IMG-01;enterprise-attack;New container;T1612;TA0002
-T-IMG-04;enterprise-attack;New container;T1610;TA0002
-T-IMG-04;enterprise-attack;New container;T1612;TA0002
-T-GEN-01;enterprise-attack;Application exploit (RCE);T1190;TA0002
-T-VM-C-01;enterprise-attack;Backdoor container;T1543;TA0003
-T-VM-C-01;enterprise-attack;Backdoor container;T1542;TA0003
-T-VL-02;enterprise-attack;Backdoor container;T1543;TA0003
-T-VL-02;enterprise-attack;Backdoor container;T1542;TA0003
-T-VM-C-02;enterprise-attack;Writable hostPath mount;T1611;TA0003
-T-VM-C-02;enterprise-attack;Writable hostPath mount;T1611;TA0004
-T-VM-C-02;enterprise-attack;Writable hostPath mount;T1611;TA0008
-T-VM-C-01;enterprise-attack;Kubernetes CronJob;T1053.007;TA0003
-T-GEN-02;enterprise-attack;Container service account;T1528;TA0006
-T-GEN-02;enterprise-attack;Container service account;T1528;TA0008
-T-GEN-02;enterprise-attack;Container service account;T1528;TA0003
-T-VM-C-01;enterprise-attack;Privileged container;T1610;TA0004
-T-VM-C-01;enterprise-attack;Clear container logs;T1070;TA0005
-T-O2-01;enterprise-attack;Delete Kubernetes events;T1070;TA0005
-T-VL-01;enterprise-attack;Pod or container name similarity;T1036;TA0005
-T-VL-01;enterprise-attack;Pod or container name similarity;T1036.005;TA0005
-T-IMG-01;enterprise-attack;Pod or container name similarity;T1036;TA0005
-T-IMG-01;enterprise-attack;Pod or container name similarity;T1036.005;TA0005
-T-IMG-03;enterprise-attack;List Kubernetes secrets;T1552;TA0006
-T-GEN-02;enterprise-attack;Mount service principal;T1552;TA0006
-T-ADMIN-02;enterprise-attack;Application credentials in configuration files;T1552;TA0006
-T-ADMIN-02;enterprise-attack;Application credentials in configuration files;T1552;TA0008
-T-VM-C-03;enterprise-attack;Application credentials in configuration files;T1552;TA0006
-T-VM-C-03;enterprise-attack;Application credentials in configuration files;T1552;TA0008
-T-GEN-02;enterprise-attack;Access Managed Identity credentials;T1552;TA0006
-T-O2-01;enterprise-attack;Access Kubernetes API server;T1613;TA0007
-T-O2-01;enterprise-attack;Access Kubelet API;T1613;TA0007
-T-O2-01;enterprise-attack;Network mapping;T1046;TA0007
-T-VM-C-03;enterprise-attack;Instance Metadata API;T1552;TA0007
-T-IMG-03;enterprise-attack;Instance Metadata API;T1552;TA0007
-T-VM-C-02;enterprise-attack;Cluster internal networking;T1210;TA0008
-T-IMG-01;enterprise-attack;Images from a private registry;T1530;TA0009
-T-IMG-04;enterprise-attack;Images from a private registry;T1530;TA0009
-T-VM-C-01;enterprise-attack;Data destruction;T1485;TA0040
-T-VM-C-04;enterprise-attack;Resource hijacking;T1496;TA0040
-T-VL-01;enterprise-attack;Resource hijacking;T1496;TA0040
-T-ADMIN-01;enterprise-attack;Denial of service;T1498;TA0040
-T-ADMIN-01;enterprise-attack;Denial of service;T1499;TA0040
-T-VM-C-04;enterprise-attack;Denial of service;T1498;TA0040
-T-VM-C-04;enterprise-attack;Denial of service;T1499;TA0040
-T-VM-C-05;enterprise-attack;Denial of service;T1498;TA0040
-T-VM-C-05;enterprise-attack;Denial of service;T1499;TA0040
+T-IMG-01;enterprise-attack;Application Vulnerability;T1190;initial-access
+T-VM-C-01;enterprise-attack;bash or cmd inside container;T1059;execution
+T-VM-C-01;enterprise-attack;bash or cmd inside container;TT1204;execution
+T-ADMIN-02;enterprise-attack;bash or cmd inside container;T1059;execution
+T-ADMIN-02;enterprise-attack;bash or cmd inside container;TT1204;execution
+T-HW-01;enterprise-attack;bash or cmd inside container;T1059;execution
+T-HW-01;enterprise-attack;bash or cmd inside container;TT1204;execution
+T-IMG-01;enterprise-attack;bash or cmd inside container;T1059;execution
+T-IMG-01;enterprise-attack;bash or cmd inside container;TT1204;execution
+T-VM-C-01;enterprise-attack;Kubernetes CronJob;T1053.007;persistence
+T-VM-C-01;enterprise-attack;Clear container logs;T1070;defense-evasion
+T-IMG-01;enterprise-attack;Compromised Image In Registry;T1195.002;initial-access
+T-IMG-01;enterprise-attack;Compromised Image In Registry;T1525;initial-access
+T-GEN-02;enterprise-attack;Access Managed Identity credentials;T1552;credential-access
+T-O2-01;enterprise-attack;Network mapping;T1046;discovery
+T-VM-C-02;enterprise-attack;Cluster internal networking;T1210;lateral-movement
+T-IMG-01;enterprise-attack;images from a private registry;T1530;collection
+T-IMG-04;enterprise-attack;images from a private registry;T1530;collection
+T-ADMIN-02;enterprise-attack;Exec into container;T1609;execution
+T-O2-01;enterprise-attack;Exec into container;T1609;execution
+T-VM-C-03;enterprise-attack;Exec into container;T1609;execution
+T-VM-C-04;enterprise-attack;Exec into container;T1609;execution
+T-VM-C-01;enterprise-attack;Backdoor container;T1543;persistence
+T-VM-C-01;enterprise-attack;Backdoor container;T1542;persistence
+T-VL-02;enterprise-attack;Backdoor container;T1543;persistence
+T-VL-02;enterprise-attack;Backdoor container;T1542;persistence
+T-GEN-02;enterprise-attack;Mount service principal;T1552;credential-access
+T-O2-01;enterprise-attack;Access Kubelet API;T1613;discovery
+T-IMG-03;enterprise-attack;List K8S secrets;T1552;credential-access
+T-VM-C-04;enterprise-attack;Resource hijacking;T1496;impact
+T-VL-01;enterprise-attack;Resource hijacking;T1496;impact
+T-O2-01;enterprise-attack;Delete K8S events;T1070;defense-evasion
+T-VL-01;enterprise-attack;Pod or container name similarily;T1036;defense-evasion
+T-VL-01;enterprise-attack;Pod or container name similarily;T1036.005;defense-evasion
+T-IMG-01;enterprise-attack;Pod or container name similarily;T1036;defense-evasion
+T-IMG-01;enterprise-attack;Pod or container name similarily;T1036.005;defense-evasion
+T-ADMIN-01;enterprise-attack;Denial of service;T1498;impact
+T-ADMIN-01;enterprise-attack;Denial of service;T1499;impact
+T-VM-C-04;enterprise-attack;Denial of service;T1498;impact
+T-VM-C-04;enterprise-attack;Denial of service;T1499;impact
+T-VM-C-05;enterprise-attack;Denial of service;T1498;impact
+T-VM-C-05;enterprise-attack;Denial of service;T1499;impact
+T-GEN-02;enterprise-attack;container service account;T1528;credential-access
+T-GEN-02;enterprise-attack;container service account;T1528;lateral-movement
+T-GEN-02;enterprise-attack;container service account;T1528;persistence
+T-ADMIN-02;enterprise-attack;Application credentials in configuration files;T1552;credential-access
+T-VM-C-03;enterprise-attack;Application credentials in configuration files;T1552;credential-access
+T-ADMIN-02;enterprise-attack;Application credentials in configuration files;T1552;lateral-movement
+T-VM-C-03;enterprise-attack;Application credentials in configuration files;T1552;lateral-movement
+T-VM-C-03;enterprise-attack;Instance Metadata API;T1552;discovery
+T-IMG-03;enterprise-attack;Instance Metadata API;T1552;discovery
+T-VM-C-01;enterprise-attack;Data destruction;T1485;impact
+T-GEN-01;enterprise-attack;Application exploit (RCE);T1190;execution
+T-VM-C-01;enterprise-attack;Privileged container;T1610;privilege-escalation
+T-VM-C-02;enterprise-attack;Writable hostPath mount;T1611;persistence
+T-VM-C-02;enterprise-attack;Writable hostPath mount;T1611;privilege-escalation
+T-VM-C-02;enterprise-attack;Writable hostPath mount;T1611;lateral-movement
+T-O2-01;enterprise-attack;Access the K8S API server;T1613;discovery
+T-GEN-02;enterprise-attack;Exposed sensitive interfaces;T1133;initial-access
+T-GEN-02;enterprise-attack;Exposed sensitive interfaces;T1078;initial-access
+T-GEN-02;enterprise-attack;Exposed sensitive interfaces;T1133;discovery
+T-GEN-02;enterprise-attack;Exposed sensitive interfaces;T1078;discovery
+T-IMG-01;enterprise-attack;New Container;T1610;execution
+T-IMG-01;enterprise-attack;New Container;T1612;execution
+T-IMG-04;enterprise-attack;New Container;T1610;execution
+T-IMG-04;enterprise-attack;New Container;T1612;execution
