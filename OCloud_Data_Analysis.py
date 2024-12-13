@@ -189,7 +189,6 @@ def print_stats(fetched_info):
 
     for technique in fetched_info:
         teq_name = technique["technique_id"]
-        print(f"Technique: {teq_name}")
         count_teq += 1
         for capec in technique["t_findings"]:
             count_capec += 1
@@ -198,7 +197,6 @@ def print_stats(fetched_info):
                 count_cwe += 1
                 if cves_df.keys().size != 0:
                     count_cve += cves_df["v2_score"].keys().size
-                    print(f"teq Name: {teq_name} -> {cves_df['v2_score'].mean()}")
                     avg_v2_score[teq_name] = cves_df["v2_score"].mean()
                     avg_v2_impact_score.append(cves_df["v2_impact_score"].mean())
                     avg_v2_exploitability_score.append(cves_df["v2_exploitability_score"].mean())
@@ -375,12 +373,21 @@ def plot_and_save_radar(df, file=None, groups=None, filled: bool = True, dotted:
     for group in groups:
         index = df.loc[df['group'] == group].index.tolist()[0]
         values = flatten_from_df(df, index)
+        print(group)
+        colors = 'b'
+        if group == 'High' or group == 'Overall':
+            print("Setting color to red")
+            colors = 'r'
+        elif group == 'Medium' or group == 'Network':
+            colors = 'y'
+        elif group == 'Low' or group == 'Local': 
+            colors = 'g'
         if dotted:
             ax.plot(angles, values, 'o-', linewidth=2, label=group)
         else:
-            ax.plot(angles, values, linewidth=2, linestyle='solid', label=group)
+            ax.plot(angles, values, color=colors,alpha=0.8, linewidth=2, linestyle='solid', label=group)
         if filled:
-            ax.fill(angles, values, 'b', alpha=0.1)
+            ax.fill(angles, values, color=colors, alpha=0.1)
 
     # TODO: Looks better?
     #set_pad_spwp(ax)
@@ -448,15 +455,26 @@ def gen_o_ran_threats_severity(grouped, sum_overall_technique_df):
     return o_ran_threats_severity_acc, o_ran_threats_severity_mean
 
 
-def gen_vector_df(fetched_info, lo_net):
+def gen_vector_df(fetched_info, cve_attr, attr_value):
     vector_df = pd.DataFrame(columns=["Vector"])
     for technique in fetched_info:
         for cwes in technique["t_findings"]:
             for cves in cwes["c_findings"]:
                 for cve in cves["cves"]:
-                    if cve["access_vector"] == lo_net:
-                        vector_df = pd.concat([vector_df, pd.DataFrame.from_records(
-                            {"Vector": get_scores_from_vector(cve["v2_vector"])})], ignore_index=True)
+                    if cve[cve_attr] == attr_value or cve_attr == "v2_score":
+                        print(f"cve {cve['cve_id']} has {cve_attr} {attr_value}")
+                        if attr_value == "HIGH" and cve["v2_score"] > 7 and cve["v2_score"] <= 10:
+                            vector_df = pd.concat([vector_df, pd.DataFrame.from_records(
+                                {"Vector": get_scores_from_vector(cve["v2_vector"])})], ignore_index=True)
+                        elif attr_value == "MEDIUM" and cve["v2_score"] > 4 and cve["v2_score"] <= 7:
+                            vector_df = pd.concat([vector_df, pd.DataFrame.from_records(
+                                {"Vector": get_scores_from_vector(cve["v2_vector"])})], ignore_index=True)
+                        elif attr_value == "LOW" and cve["v2_score"] >= 0 and cve["v2_score"] <= 4:
+                            vector_df = pd.concat([vector_df, pd.DataFrame.from_records(
+                                {"Vector": get_scores_from_vector(cve["v2_vector"])})], ignore_index=True)
+                        elif cve_attr != "v2_score": # if attr_value is not HIGH, MEDIUM or LOW
+                            vector_df = pd.concat([vector_df, pd.DataFrame.from_records(
+                                {"Vector": get_scores_from_vector(cve["v2_vector"])})], ignore_index=True)
                     else:
                         continue
     return vector_df

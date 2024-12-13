@@ -24,14 +24,38 @@ plot_and_save_bar(counts = mean_overall_technique_df,file="./img/mean_cvss_score
 mapping = {"AC": "Access Complexity", "Au": "Authentication",
                    "AV": "AccessVector", "C": "Confidentiality Impact",
                    "I": "Integrity Impact", "A": "Availability Impact"}
-vector_df_network = gen_vector_df(fetched_info, "NETWORK")
-vector_df_local = gen_vector_df(fetched_info, "LOCAL")
+vector_df_network = gen_vector_df(fetched_info,"access_vector", "NETWORK")
+vector_df_local = gen_vector_df(fetched_info,"access_vector", "LOCAL")
+vector_df_high = gen_vector_df(fetched_info,"v2_score", "HIGH")
+vector_df_low = gen_vector_df(fetched_info,"v2_score", "LOW")
+vector_df_medium = gen_vector_df(fetched_info,"v2_score", "MEDIUM")
+print("high vector count: ",len(vector_df_high)/6)
+print("medium vector count: ",len(vector_df_medium)/6)
+print("low vector count: ",len(vector_df_low)/6)
+
+vector_df_high = insert_length_wise(vector_df_high)
+vector_high_avgs = vector_df_high.mean(axis=0)
+vector_df_low = insert_length_wise(vector_df_low)
+vector_low_avgs = vector_df_low.mean(axis=0)
+vector_df_medium = insert_length_wise(vector_df_medium)
+vector_medium_avgs = vector_df_medium.mean(axis=0)
 vector_df_network = insert_length_wise(vector_df_network)
 vector_network_avgs = vector_df_network.mean(axis=0)
 vector_df_local = insert_length_wise(vector_df_local)
 vector_local_avgs = vector_df_local.mean(axis=0)
     
-vectors = [get_scores_from_vector(cve["v2_vector"]) for technique in fetched_info for cwes in technique["t_findings"] for cves in cwes["c_findings"] for cve in cves["cves"]]
+vectors = []
+visited_cves = []
+for technique in fetched_info:
+    for cwes in technique["t_findings"]:
+        for cves in cwes["c_findings"]:
+            for cve in cves["cves"]:
+                if cve["cve_id"] in visited_cves:
+                    continue
+                visited_cves.append(cve["cve_id"])
+                score = get_scores_from_vector(cve["v2_vector"])
+                vectors.append(score)
+print("vectors of unique cves: ",len(vectors))
 vector_df = pd.DataFrame(vectors, columns=['AV','AC', 'Au', 'C', 'I', 'A'])
 vector_avgs = vector_df.mean(axis=0)
 print(vector_avgs)
@@ -39,12 +63,23 @@ df = pd.DataFrame({
 'group': ['Overall'],
 'Access \nVector': [vector_avgs.AV],
 'Access \nComplexity': [vector_avgs.AC],
-'Authentication': [vector_avgs.A],
+'Authentication': [vector_avgs.Au],
 'Confidentiality \nImpact': [vector_avgs.C],
 'Integrity \nImpact': [vector_avgs.I],
 'Availability \nImpact': [vector_avgs.A]
 })
 plot_and_save_radar(df,filled=True,dotted=True, file="./img/radar_plot_vector_overall.pdf")
+
+df = pd.DataFrame({
+    'group': ['High', 'Medium', 'Low'],
+    'Access \nVector': [vector_high_avgs.AV, vector_medium_avgs.AV, vector_low_avgs.AV],
+    'Access \nComplexity': [vector_high_avgs.AC, vector_medium_avgs.AC, vector_low_avgs.AC],
+    'Authentication': [vector_high_avgs.Au, vector_medium_avgs.Au, vector_low_avgs.Au],
+    'Confidentiality \nImpact': [vector_high_avgs.C, vector_medium_avgs.C, vector_low_avgs.C],
+    'Integrity \nImpact': [vector_high_avgs.I, vector_medium_avgs.I, vector_low_avgs.I],
+    'Availability \nImpact': [vector_high_avgs.A, vector_medium_avgs.A, vector_low_avgs.A]
+})
+plot_and_save_radar(df, file="./img/radar_plot_vector_per_severity.pdf")
 
 df = pd.DataFrame({
 'group': ['Overall', 'Network', 'Local'],
