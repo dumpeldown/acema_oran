@@ -223,8 +223,7 @@ def gen_statistics_per_tactic(fetched_info):
                     continue
                 if len(cves["cves"]) > 0:
                     df = pd.DataFrame.from_dict(cves["cves"])
-                    new_df = pd.DataFrame(df['score'].to_list(), columns=["v", "Score", "Severity"]).drop(columns="v")
-                    inter_df = pd.concat([inter_df, new_df], ignore_index=True)
+                    inter_df = pd.concat([inter_df, df], ignore_index=True)
                 inter_df["Technique"] = technique["technique_id"]
             overall_df = pd.concat([overall_df, inter_df], ignore_index=True)
 
@@ -234,7 +233,8 @@ def gen_statistics_per_tactic(fetched_info):
         ordered=True
     )
     # Cast data to category type with orderedness
-    overall_df["Severity"] = overall_df["Severity"].astype(severity_order)
+    overall_df["Severity"] = overall_df["full_metrics"].apply(lambda x: x[0].get("baseSeverity") if x else None).astype(severity_order)
+    overall_df["Score"] = overall_df["v2_score"]
     return overall_df.groupby(["Technique", "Severity"])["Score"].sum().reset_index(), overall_df.groupby(["Technique", "Severity"])["Score"].mean().reset_index(), overall_df.groupby(["Technique"])["Score"].count().reset_index()
 
 def generate_json_with_scores(fetched_info):
@@ -373,10 +373,8 @@ def plot_and_save_radar(df, file=None, groups=None, filled: bool = True, dotted:
     for group in groups:
         index = df.loc[df['group'] == group].index.tolist()[0]
         values = flatten_from_df(df, index)
-        print(group)
         colors = 'b'
         if group == 'High' or group == 'Overall':
-            print("Setting color to red")
             colors = 'r'
         elif group == 'Medium' or group == 'Network':
             colors = 'y'
@@ -438,12 +436,10 @@ def gen_o_ran_threats_severity(grouped, sum_overall_technique_df):
     o_ran_threats_severity_acc = pd.DataFrame()
     o_ran_threats_severity_mean = pd.DataFrame()
     
-
     for name, group in grouped:
         o_ran_threats = pd.DataFrame()
         for i in group["Technique"].drop_duplicates():
             o_ran_threats = pd.concat([o_ran_threats, sum_overall_technique_df.query("Technique == @i")])
-
         temp_o_ran_threat_severity_acc = o_ran_threats.groupby("Severity").sum(numeric_only=True).reset_index()
         temp_o_ran_threat_severity_mean = o_ran_threats.groupby("Severity").mean(numeric_only=True).reset_index()
         
@@ -454,7 +450,6 @@ def gen_o_ran_threats_severity(grouped, sum_overall_technique_df):
         
     return o_ran_threats_severity_acc, o_ran_threats_severity_mean
 
-
 def gen_vector_df(fetched_info, cve_attr, attr_value):
     vector_df = pd.DataFrame(columns=["Vector"])
     for technique in fetched_info:
@@ -462,7 +457,6 @@ def gen_vector_df(fetched_info, cve_attr, attr_value):
             for cves in cwes["c_findings"]:
                 for cve in cves["cves"]:
                     if cve[cve_attr] == attr_value or cve_attr == "v2_score":
-                        print(f"cve {cve['cve_id']} has {cve_attr} {attr_value}")
                         if attr_value == "HIGH" and cve["v2_score"] > 7 and cve["v2_score"] <= 10:
                             vector_df = pd.concat([vector_df, pd.DataFrame.from_records(
                                 {"Vector": get_scores_from_vector(cve["v2_vector"])})], ignore_index=True)
