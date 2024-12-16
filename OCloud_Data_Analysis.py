@@ -235,7 +235,7 @@ def gen_statistics_per_tactic(fetched_info):
     # Cast data to category type with orderedness
     overall_df["Severity"] = overall_df["full_metrics"].apply(lambda x: x[0].get("baseSeverity") if x else None).astype(severity_order)
     overall_df["Score"] = overall_df["v2_score"]
-    return overall_df.groupby(["Technique", "Severity"])["Score"].sum().reset_index(), overall_df.groupby(["Technique", "Severity"])["Score"].mean().reset_index(), overall_df.groupby(["Technique"])["Score"].count().reset_index()
+    return overall_df.groupby(["Technique", "Severity"])["Score"].sum().reset_index(), overall_df.groupby(["Technique", "Severity"])["Score"].mean().reset_index()
 
 def generate_json_with_scores(fetched_info):
     new_json = []
@@ -450,12 +450,16 @@ def gen_o_ran_threats_severity(grouped, sum_overall_technique_df):
         
     return o_ran_threats_severity_acc, o_ran_threats_severity_mean
 
-def gen_vector_df(fetched_info, cve_attr, attr_value):
+def gen_vector_df(fetched_info, cve_attr, attr_value, all=False):
     vector_df = pd.DataFrame(columns=["Vector"])
     for technique in fetched_info:
         for cwes in technique["t_findings"]:
             for cves in cwes["c_findings"]:
                 for cve in cves["cves"]:
+                    if all:
+                        vector_df = pd.concat([vector_df, pd.DataFrame.from_records(
+                            {"Vector": get_scores_from_vector(cve["v2_vector"])})], ignore_index=True)
+                        continue
                     if cve[cve_attr] == attr_value or cve_attr == "v2_score":
                         if attr_value == "HIGH" and cve["v2_score"] > 7 and cve["v2_score"] <= 10:
                             vector_df = pd.concat([vector_df, pd.DataFrame.from_records(
