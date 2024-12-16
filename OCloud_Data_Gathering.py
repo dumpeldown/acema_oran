@@ -4,8 +4,8 @@ import os
 import shutil
 import time
 from datetime import date
+from collections import defaultdict
 
-import cve_lookup
 import mitreattack.attackToExcel.attackToExcel as attackToExcel
 import mitreattack.attackToExcel.stixToDf as stixToDf
 import nvdlib
@@ -42,73 +42,44 @@ def get_attack_pattern_by_capec_id(src, capec_id):
 
 def get_capec_external_references_cwes(src, capec):
     id = capec.split("-")[1]
-    test = get_attack_pattern_by_capec_id(src, id)
-    if len(test) != 0:
-        return test[0]["external_references"]
+    all_refs = get_attack_pattern_by_capec_id(src, id)
+    if len(all_refs) != 0:
+        return all_refs[0]["external_references"]
     else:
         return []
-
 
 def iterate_cve_for_given_cwe(db, cwe):
     cve_list = []
     weakness = db.get(cwe.split("-")[1])
     observed_examples = weakness.__dict__["observed_examples"]
     cves = [word for word in observed_examples.split(":") if word.startswith("CVE-")]
-
+    print(f"Found {len(cves)} CVE's for CWE {cwe}: ")
+    cve_num = 0
     for cve in cves:
-        cve_full = None
-        while cve_full is None:
-            try:
-                cve_full = cve_lookup.cve(cve)
-                print(f"{cve_full.id}, ", end='')
-            except Exception as e:
-                print(f"\nError during lookup for cve entry ..\n -> {e} \n Retrying.\n")
-                time.sleep(3)
-
-        r = None
-        while r is None:
-            try:
-                r = nvdlib.searchCVE(cveId=cve, key='8051e78c-9d20-4b6d-9bcb-20ce09eed8b8')[0]
-
-                cve_list.append({"id": cve_full.id,
-                                 "score": r.score,
-                                 "v2_score": r.v2score,
-                                 "v2_exploitability_score": r.v2exploitability,
-                                 "v2_impact_score": r.v2impactScore,
-                                 "v2_vector": r.v2vector,
-                                 "access_vector": r.metrics.cvssMetricV2[0].cvssData.accessVector,
-                                 "full_metrics": r.metrics.cvssMetricV2,
-                                 "description": r.descriptions[0].value,
-                                 "cpe_vulnerable": r.cpe[0].vulnerable,
-                                 "cpe_criteria": r.cpe[0].criteria,
-                                 "published": r.published,
-                                 "last_modified": r.lastModified
-                                 })
-
-            except Exception as e:
-                print(f"\nError during fetch for {cve_full.id}..\n -> {e} \n Retrying.\n")
-                time.sleep(10)
-
-    return {"cwe": cwe, "cves": cve_list, "cwe_info": weakness.__dict__}
+        print(f"({cve_num+1}/{len(cves)}) ", end='')
+        cve_num += 1
+        print(cve, end=', ')
+        #cve_list.append(cve)
+        cve_list.append(get_cve_info(cve)) # Uncomment this line to get full CVE info
+    return {"cwe": cwe, 
+            "cves": cve_list,
+            #"cwe_info": weakness.__dict__  # Uncomment this line to get full CWE info
+            }
 
 
 def pull_clone_gitrepo(directory, repo):
-    # Check if the data direcory exists
     if not os.path.isdir(directory):
         Repo.clone_from(repo, directory)
     else:
         try:
-            # Check if the data directory is actually a repositry then pull the canges
             repo = Repo(directory)
             repo.remotes.origin.pull()
         except InvalidGitRepositoryError:
-            # If not then remove the folder
             shutil.rmtree(directory)
             Repo.clone_from(repo, directory)
 
 
 def generate_techniques_dataframe():
-    # download and parse ATT&CK STIX data
     attackdata = attackToExcel.get_stix_data("enterprise-attack", "v4.0")
     # get Pandas DataFrames for techniques, associated relationships, and citations
     techniques_data = stixToDf.techniquesToDf(attackdata, "enterprise-attack")
@@ -137,6 +108,45 @@ def get_technique_capecs_id(grouped, techniques_df):
             techniques_capecs.append((i, capecs))
     return techniques_capecs
 
+def get_technique_capecs_id_custom(techniques, directory):
+    grouped_results = defaultdict(list)
+    capec21_dir = os.path.join(directory, "capec/2.1/attack-pattern")
+    enterprise_attack_dir = os.path.join(directory, "enterprise-attack/attack-pattern")
+    attack_pattern_dirs = [capec21_dir, enterprise_attack_dir]
+    if not os.path.isdir(capec21_dir) or not os.path.isdir(enterprise_attack_dir):
+        raise FileNotFoundError(f"Directory not found: {capec21_dir} or {enterprise_attack_dir}")
+
+    # Iterate through JSON files in the directory
+    file_number = 0
+    for attack_pattern_dir in attack_pattern_dirs:
+        for filename in os.listdir(attack_pattern_dir):
+            file_number += 1
+            if filename.endswith(".json"):
+                file_path = os.path.join(attack_pattern_dir, filename)
+                
+                # Load and parse JSON file
+                with open(file_path, 'r', encoding='utf-8') as f:
+                    stix_data = json.load(f)
+                
+                # Process each object in the JSON
+                for obj in stix_data.get("objects", []):
+                    if obj.get("type") == "attack-pattern" and "external_references" in obj:
+                        for ref in obj["external_references"]:
+                            try:
+                                if (ref.get("external_id") in techniques):# or (ref.get("external_id").split(".")[0] in techniques): # uncomment this line to include subtechniques
+                                    # Extract CAPECs associated with the technique
+                                    for capec_ref in obj["external_references"]:
+                                        if capec_ref.get("source_name") == "capec":
+                                            if ref.get("external_id") in techniques:
+                                                grouped_results[ref.get("external_id")].append(capec_ref["external_id"])
+                                            else:
+                                                grouped_results[ref.get("external_id").split(".")[0]].append(capec_ref["external_id"])
+                            except:
+                                pass
+    print(f"Processed {file_number} files.")
+    return [(technique_id, grouped_results.get(technique_id, [])) for technique_id in techniques]
+
+
 
 def write_ids_to_file(techniques_capecs, file):
     f = open(file, 'w')
@@ -150,36 +160,50 @@ def write_ids_to_file(techniques_capecs, file):
     f.close()
 
 
-def print_stats(techniques_capecs):
+def print_capec_stats(techniques_capecs):
     count_capecs = 0
     count_techniques = 0
-    count_empty_techniques = 0
+    count_non_empty_techniques = 0
+    unique_capecs = set()
     for (t, l_capec) in techniques_capecs:
         len_l = len(l_capec)
         count_techniques += 1
         count_capecs += len_l
-        if len_l == 0:
-            count_empty_techniques += 1
+        if len_l != 0:
+            count_non_empty_techniques += 1
+        for c in l_capec:
+            unique_capecs.add(c)
 
     print(f"Techniques: {count_techniques}")
-    print(f"Empty Techniques: {count_empty_techniques}")
+    print(f"Non-Empty Techniques: {count_non_empty_techniques}")
     print(f"CAPECs: {count_capecs}")
+    print(f"Unique CAPECs: {len(unique_capecs)}")
 
-
-def find_cwe_for_capec(techniques_capecs, fs):
+def print_cwe_stats(t_cwe_cve_dict):
+    count_cwes = 0
+    count_cves = 0
+    for t in t_cwe_cve_dict["data"]:
+        for c in t["t_findings"]:
+            for f in c["c_findings"]:
+                count_cwes += 1
+                count_cves += len(f["cves"])
+    print(f"CWE's: {count_cwes}")
+    print(f"CVE's: {count_cves}")
+    
+def find_cwe_for_capec(start, techniques_capecs, fs):
     capec_list = []
     list_of_tinfos = []
-    start = time.time()
     print("Start fetching CAPEC'S -> CWE'S -> CVE'S for given CAPEC-IDS...")
     for t_id, capec_ids in techniques_capecs:
         if len(capec_ids) != 0:
             capec_list = []
             for c_id in capec_ids:
-                print(f"\nSearching CVE's for {c_id}")
-                print("Found: ", end='')
+                print(f"\nSearching CWE's for {c_id}")
                 findings = []
                 for reference in get_capec_external_references_cwes(fs, c_id):
                     if reference["source_name"] == "cwe":
+                        print("Found: ", reference["external_id"])
+                        #findings.append(reference["external_id"]) # Uncomment this line to only get CWE's, no CVE's
                         findings.append(iterate_cve_for_given_cwe(db, reference["external_id"]))
                 capec_list.append({"capec_id": c_id, "c_findings": findings})
                 print("\n")
@@ -196,3 +220,46 @@ def find_cwe_for_capec(techniques_capecs, fs):
 def write_dict_to_file(t_cwe_cve_dict, file):
     with open(file, "w") as outfile:
         json.dump(t_cwe_cve_dict, outfile, cls=cve_custom_encoder)
+
+def get_cve_info(cve):
+    print(f"Getting info for {cve}, ", end='')
+    # cve_full = None
+    # while cve_full is None:
+    #     try:
+    #         cve_full = cve_lookup.cve(cve)
+    #         print(f"{cve_full.id}, ", end='')
+    #     except Exception as e:
+    #         print(f"\nError during lookup for cve entry ..\n -> {e} \n Retrying.\n")
+    #         time.sleep(3)
+
+    r = None
+    while r is None:
+        try:
+            r = nvdlib.searchCVE(cveId=cve, 
+                                key='31cde13c-0ee0-4b1b-81b3-4214d453e608',
+                                delay=0.6
+                                )[0]
+            if r is not None:
+                return ({           #"id": cve_full.id,
+                                    "cve_id": cve,
+                                    "score": r.score,
+                                    "v2_score": r.v2score,
+                                    "v2_exploitability_score": r.v2exploitability,
+                                    "v2_impact_score": r.v2impactScore,
+                                    "v2_vector": r.v2vector,
+                                    "access_vector": r.metrics.cvssMetricV2[0].cvssData.accessVector,
+                                    "full_metrics": r.metrics.cvssMetricV2,
+                                    "description": r.descriptions[0].value,
+                                    "cpe_vulnerable": r.cpe[0].vulnerable,
+                                    "cpe_criteria": r.cpe[0].criteria,
+                                    "published": r.published,
+                                    "last_modified": r.lastModified
+                                    })
+        except Exception as e:
+            print(f"\nError during fetch for {cve}..\n -> {e} \n Retrying.\n")
+            time.sleep(1)
+
+def get_technique_list(file):
+    with open(file, 'r') as f:
+        reader = csv.DictReader(f, delimiter=';')
+        return list(set([row['Technique'] for row in reader]))
