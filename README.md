@@ -1,67 +1,98 @@
-# Notice: Custom Version for Bachelor Thesis
 
-This is a customized version of the repository specifically tailored for the implementation of a dashboard as part of my Bachelor thesis titled:
+# Custom ACEMA Sources for Open RAN Security Dashboard
 
-"Implementation of a Dashboard for Pentesting in a Digital Forensics and Incident Response (DFIR) Environment for Open RAN."
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-For the original files and data, please refer to the original repository at: [https://github.com/fklement/acema_oran](https://github.com/fklement/acema_oran).
+(see [German version](#benutzerdefinierte-acema-quellen-für-das-open-ran-security-dashboard))
 
--------
+This repository contains a customized version of source code specifically tailored for the requirements of my Bachelor's thesis:
 
-This repository encompasses the set of code and data requisite for the replication of outcomes delineated in our paper "Towards Securing the 6G Transition: A Comprehensive Empirical Method to Analyze Threats in O-RAN Environments". The "Quickstart" section expounds upon the framework and essential prerequisites essential for executing the jupyter notebooks. ACEMA stands for _A Comprehensive Empirical Method to Analyze_.
+**"Implementation of a Dashboard for Pentesting in a Digital Forensics and Incident Response (DFIR) Environment for Open RAN".**
 
-## Short Overview
+For the original files and base code, please refer to the original repository: [https://github.com/fklement/acema_oran](https://github.com/fklement/acema_oran).
 
-> In our paper, we present a new methodology that enables the MITRE ATT&CK framework to objectively assess specific threats in 6G Radio Access Networks (RANs). This helps address new security challenges that arise in the transition to open RANs.
-> We analyze the O-Cloud component within the O-\gls{ran} ecosystem as a representative example, wherein no individual threat class demonstrates complete security.
-> The inherent modularity of our approach ensures great adaptability and allows it to be applied to various other components within this system. This allows us to effectively detect and combat threats, thereby ensuring the resilience and security of future communication networks.
+## Objective of the Thesis
 
-A detailed description as well as the findings of the investigation can be found in the [paper]().
+The goal of this thesis was to develop a dashboard that enables comprehensive security assessments of Open RAN systems. The implementation is based on the **ACEMA method** and integrates features such as **CVSS scoring** and dynamic visualizations.
 
-## Requirements
+The dashboard provides:
+- Support for pentesting scenarios in Open RAN environments.
+- Detailed vulnerability analysis by linking attack paths with known security vulnerabilities (CVE).
+- Evaluation of techniques and individual attacks using CVSS.
 
-Two code sections in both notebooks check whether all the required packages are installed. If this is not the case, they are automatically installed using `pip`. The necessary outsourced functions are also imported.
+The results of this work demonstrate the effectiveness of the dashboard as a tool for security analysis in Open RAN environments and its practical relevance for DFIR applications.
+
+---
+
+### Integration of the ACEMA Method
+
+The source codes of the empirical **ACEMA method** have been specifically adapted to meet the requirements of this work.
 
 ## Quickstart
 
-There are only two main notebooks that are relevant. One for data collection and one for analysis. Within each notebook there is detailed documentation on the individual functions.
+### Steps to Reproduce
+1. **Data collection:**
+   - Run `data_gathering_nb.py` to collect relevant vulnerability data.
+2. **Perform analysis:**
+   - Use `data_analysis_nb.py` to analyze the data and create diagrams.
 
-To reproduce the data, follow the steps below:
+---
 
-1. Execute all code blocks within the `O-Cloud - Data Gathering.ipynb`. This will create a folder called data, which is important for further analysis of the MITRE ATT&CK data.
-2. You can then run all analyses within the notebook `O-Cloud - Data Analysis.ipynb`.
+## References
 
-## Folder Structure
+- **Study: "Towards Securing the 6G Transition: A Comprehensive Empirical Method to Analyze Threats in O-RAN Environments"**.
+- Additional works within the scope of the 5G-FORAN project (currently closed-source, more information at [the website](https://www.5g-foran.com/)):
+  - Implementation of a framework for generating attack traces.
+  - Development of a dashboard prototype.
+- LaTeX project for my Bachelor's thesis [here](https://github.com/dumpeldown/foran-ba)
 
-In total there are 4 associated folders:
+--------------
+--------------
 
-- `data` _(This folder will be created after you initiate the download of the CTI data from GitHub)_
-- `img` _(All plots that are created are saved here)_
-- `mapping` _(In the mapping folder, the manually created mappings of threats are stored in CSV documents)_
-- `scans` _(Contains the scan for the CAPEC'S -> CWE'S -> CVE'S for given CAPEC-ID'S)_
 
-## Examples
+# Benutzerdefinierte ACEMA-Quellen für das Open RAN Security Dashboard
 
-![Publication figures](img/figures.png)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-The code to generate the Figures included in the publication is in the `O-Cloud - Data Analysis.ipynb` notebook.
+Diese Repository enthält die Quellcodes, die ich im Rahmen meiner Bachelorarbeit verwende:
 
-## Citation
+**"Implementierung eines Dashboards für Pentesting in einer Digital Forensics and Incident Response (DFIR) Umgebung für Open RAN".**
 
-The paper will be published in the special issue "Open RAN: A New Paradigm for Open, Virtualized, Programmable, and Intelligent Cellular Networks" of the IEEE Journal on Selected Areas in Communication in the fourth quater of 2023. As soon as a full bibtex citation is available, it will be included here.
+Für die Originaldateien und den Basiscode verweisen wir auf das ursprüngliche Repository: [https://github.com/fklement/acema_oran](https://github.com/fklement/acema_oran).
 
-If you use the provided code, please cite it as:
+## Ziel der Arbeit
 
-```bibtex
-@article{klement2023acema,
-  title = {Towards Securing the 6G Transition: A Comprehensive Empirical Method to Analyze Threats in O-RAN Environments},
-  author = {Felix Klement, Wuhao Liu, Stefan Katzenbeisser},
-  year = {2023},
-  journal = {2023 IEEE JSAC special issue on Open RAN},
-  keywords = {Security, Open RAN, Telecommunication, MITRE ATT\&CK, CVE, CWE}
-}
-```
+Das Ziel dieser Arbeit war die Entwicklung eines Dashboards, das eine umfassende Sicherheitsbewertung von Open RAN-Systemen ermöglicht. Die Implementierung baut auf der **ACEMA-Methode** auf und integriert Features wie **CVSS-Bewertungen** und dynamische Visualisierungen.
 
-## Release notes
+Das Dashboard bietet:
+- Unterstützung für Pentesting-Szenarien in Open RAN-Umgebungen.
+- Detaillierte Schwachstellenanalyse durch die Verknüpfung von Angriffspfaden mit bekannten Sicherheitslücken (CVE).
+- Bewertung von Techniken und einzelnen Angriffen mithilfe des CVSS.
 
-See the [changelog](CHANGELOG.md) for changes between versions.
+Die Ergebnisse dieser Arbeit belegen die Wirksamkeit des Dashboards als Werkzeug für Sicherheitsanalysen in Open RAN-Umgebungen und seine praktische Relevanz für DFIR-Anwendungen.
+
+---
+
+### Integration der ACEMA-Methode
+Die Quellcodes der empirischen Methode **ACEMA** wurden speziell angepasst, um die Anforderungen der Arbeit zu erfüllen.
+---
+
+## Quickstart
+
+### Schritte zur Reproduktion
+1. **Daten sammeln:**
+   - Führen Sie `data_gathering_nb.py` aus, um relevante Schwachstellendaten zu sammeln.
+2. **Analyse durchführen:**
+   - Verwenden Sie `data_analysis_nb.py`, um die Daten zu analysieren und Diagramme zu erstellen.
+
+---
+
+## Referenzen
+
+- **Studie: "Towards Securing the 6G Transition: A Comprehensive Empirical Method to Analyze Threats in O-RAN Environments"** .
+- Weiterführende Arbeiten im Rahmen des Projekts 5G-FORAN, darunter: (aktuell closed-source, weitere Infos auf [der Website](https://www.5g-foran.com/))
+  - Implementierung eines Frameworks für Angriffsspuren.
+  - Entwicklung einer Dashboard-Prototypen.
+- Latex-Projekt meiner Bachelorarbeit [hier](https://github.com/dumpeldown/foran-ba)
+
+
